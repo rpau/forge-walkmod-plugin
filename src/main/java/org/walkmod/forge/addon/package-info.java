@@ -1,0 +1,1 @@
+package org.walkmod.forge.addon;
