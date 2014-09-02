@@ -1,10 +1,22 @@
+/*  Copyright (C) 2014 Raquel Pau and Albert Coroleu.
+ 
+  Forge Walkmod Plugin is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Lesser General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+ 
+  Forge Walkmod Plugin is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Lesser General Public License for more details.
+ 
+  You should have received a copy of the GNU Lesser General Public License
+  along with Walkmod.  If not, see <http://www.gnu.org/licenses/>.*/
 package org.walkmod.forge.addon.commands;
 
 import java.io.File;
-import java.net.URL;
-
 import javax.inject.Inject;
-
+import org.apache.commons.io.FileUtils;
 import org.jboss.forge.addon.dependencies.builder.CoordinateBuilder;
 import org.jboss.forge.addon.maven.plugins.ExecutionBuilder;
 import org.jboss.forge.addon.maven.plugins.MavenPluginImpl;
@@ -48,34 +60,41 @@ public class WalkmodSetupCommand extends AbstractProjectCommand {
 	@Override
 	public Result execute(UIExecutionContext context) throws Exception {
 		Project project = getSelectedProject(context);
-		ResourcesFacet resourcesFacet = project.getFacet(ResourcesFacet.class);
-		FileResource<?> fileResource = resourcesFacet
-				.getResource("walkmod.xml");
-
-		if (!fileResource.exists()) {
-			URL template = this.getClass().getClassLoader()
-					.getResource("/template"+File.separator+"walkmod.xml");
-
-			fileResource.createFrom(new File(template.toURI()));
-
-			if (project.hasFacet(MavenPluginFacet.class) && embedded.getValue()) {
-
-				MavenPluginFacet facet = project
-						.getFacet(MavenPluginFacet.class);
-				MavenPluginImpl mp = new MavenPluginImpl();
-
-				CoordinateBuilder coordinate = CoordinateBuilder.create()
-						.setGroupId("org.walkmod")
-						.setArtifactId("maven-walkmod-plugin")
-						.setVersion("1.0");
-				mp.setCoordinate(coordinate);
-				mp.addExecution(ExecutionBuilder.create()
-						.setPhase("generate-sources").addGoal("apply"));
-				facet.addPlugin(mp);
+		if (project.hasFacet(ResourcesFacet.class)) {
+			ResourcesFacet resourcesFacet = project
+					.getFacet(ResourcesFacet.class);
+			File fileResource = new File("walkmod.xml");
+			if (!fileResource.exists()) {
+				FileResource<?> template = resourcesFacet
+						.getResource("/template" + File.separator
+								+ "walkmod.xml");
+				if (!template.exists()) {
+					return Results
+							.fail("The template 'template/walkmod.xml' is not found");
+				}
+				fileResource.createNewFile();
+				FileUtils.writeStringToFile(fileResource,
+						template.getContents());
+				if (project.hasFacet(MavenPluginFacet.class)
+						&& embedded.getValue()) {
+					MavenPluginFacet facet = project
+							.getFacet(MavenPluginFacet.class);
+					MavenPluginImpl mp = new MavenPluginImpl();
+					CoordinateBuilder coordinate = CoordinateBuilder.create()
+							.setGroupId("org.walkmod")
+							.setArtifactId("maven-walkmod-plugin")
+							.setVersion("1.0");
+					mp.setCoordinate(coordinate);
+					mp.addExecution(ExecutionBuilder.create()
+							.setPhase("generate-sources").addGoal("apply"));
+					facet.addPlugin(mp);
+				}
 			}
+			return Results
+					.success("Command 'walkmod-setup' successfully executed!");
+		} else {
+			return Results.fail("Invalid resource facet");
 		}
-		return Results
-				.success("Command 'walkmod-setup' successfully executed!");
 	}
 
 	@Override

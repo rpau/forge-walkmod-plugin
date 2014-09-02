@@ -5,11 +5,8 @@ import java.util.ArrayList;
 
 import javax.inject.Inject;
 
-import org.jboss.forge.addon.projects.Project;
 import org.jboss.forge.addon.projects.ProjectFactory;
-import org.jboss.forge.addon.projects.facets.ResourcesFacet;
 import org.jboss.forge.addon.projects.ui.AbstractProjectCommand;
-import org.jboss.forge.addon.resource.FileResource;
 import org.jboss.forge.addon.ui.context.UIBuilder;
 import org.jboss.forge.addon.ui.context.UIContext;
 import org.jboss.forge.addon.ui.context.UIExecutionContext;
@@ -41,6 +38,10 @@ public class WalkmodApplyCommand extends AbstractProjectCommand {
 	@Inject
 	@WithAttributes(label = "chains", description = "walkmod chains to apply. If no chain is selected, Walkmod will apply all declared chains", required = false)
 	private UIInputMany<String> chains;
+	
+	@Inject
+	@WithAttributes(label = "offline", type = InputType.CHECKBOX, defaultValue = "false", description = "Run walkmod without downloading plugins", required = false)
+	private UIInput<Boolean> offline;
 
 	@Override
 	public UICommandMetadata getMetadata(UIContext context) {
@@ -50,20 +51,16 @@ public class WalkmodApplyCommand extends AbstractProjectCommand {
 
 	@Override
 	public void initializeUI(UIBuilder builder) throws Exception {
-		 builder.add(chains).add(printError).add(verbose);
+		 builder.add(chains).add(printError).add(verbose).add(offline);
 	}
 
 	@Override
 	public Result execute(UIExecutionContext context) throws Exception {
-		Project project = getSelectedProject(context);
+		
+		File walkmodCfgFile = new File("walkmod.xml");
 
-		ResourcesFacet resourcesFacet = project.getFacet(ResourcesFacet.class);
-		FileResource<?> fileResource = resourcesFacet
-				.getResource("walkmod.xml");
-
-		if (fileResource.exists()) {
-			WalkModFacade walkmod = new WalkModFacade(new File(
-					fileResource.getFullyQualifiedName()), false,
+		if (walkmodCfgFile.exists()) {
+			WalkModFacade walkmod = new WalkModFacade(walkmodCfgFile, false,
 					verbose.getValue(), printError.getValue());
 			if (!chains.hasValue()) {
 				walkmod.apply();

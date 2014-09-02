@@ -1,15 +1,24 @@
+/*  Copyright (C) 2014 Raquel Pau and Albert Coroleu.
+ 
+  Forge Walkmod Plugin is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Lesser General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+ 
+  Forge Walkmod Plugin is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Lesser General Public License for more details.
+ 
+  You should have received a copy of the GNU Lesser General Public License
+  along with Walkmod.  If not, see <http://www.gnu.org/licenses/>.*/
 package org.walkmod.forge.addon.commands;
 
 import java.io.File;
 import java.util.ArrayList;
-
 import javax.inject.Inject;
-
-import org.jboss.forge.addon.projects.Project;
 import org.jboss.forge.addon.projects.ProjectFactory;
-import org.jboss.forge.addon.projects.facets.ResourcesFacet;
 import org.jboss.forge.addon.projects.ui.AbstractProjectCommand;
-import org.jboss.forge.addon.resource.FileResource;
 import org.jboss.forge.addon.ui.context.UIBuilder;
 import org.jboss.forge.addon.ui.context.UIContext;
 import org.jboss.forge.addon.ui.context.UIExecutionContext;
@@ -22,7 +31,6 @@ import org.jboss.forge.addon.ui.result.Result;
 import org.jboss.forge.addon.ui.result.Results;
 import org.jboss.forge.addon.ui.util.Metadata;
 import org.walkmod.WalkModFacade;
-
 import com.google.common.collect.Lists;
 
 public class WalkmodCheckCommand extends AbstractProjectCommand {
@@ -42,6 +50,10 @@ public class WalkmodCheckCommand extends AbstractProjectCommand {
 	@WithAttributes(label = "chains", description = "walkmod chains to apply. If no chain is selected, Walkmod will apply all declared chains", required = false)
 	private UIInputMany<String> chains;
 
+	@Inject
+	@WithAttributes(label = "offline", type = InputType.CHECKBOX, defaultValue = "false", description = "Run walkmod without downloading plugins", required = false)
+	private UIInput<Boolean> offline;
+
 	@Override
 	public UICommandMetadata getMetadata(UIContext context) {
 		return Metadata.forCommand(WalkmodCheckCommand.class).name(
@@ -50,20 +62,14 @@ public class WalkmodCheckCommand extends AbstractProjectCommand {
 
 	@Override
 	public void initializeUI(UIBuilder builder) throws Exception {
-		builder.add(chains).add(printError).add(verbose);
+		builder.add(chains).add(printError).add(verbose).add(offline);
 	}
 
 	@Override
 	public Result execute(UIExecutionContext context) throws Exception {
-		Project project = getSelectedProject(context);
-
-		ResourcesFacet resourcesFacet = project.getFacet(ResourcesFacet.class);
-		FileResource<?> fileResource = resourcesFacet
-				.getResource("walkmod.xml");
-
-		if (fileResource.exists()) {
-			WalkModFacade walkmod = new WalkModFacade(new File(
-					fileResource.getFullyQualifiedName()), false,
+		File walkmodCfgFile = new File("walkmod.xml");
+		if (walkmodCfgFile.exists()) {
+			WalkModFacade walkmod = new WalkModFacade(walkmodCfgFile, false,
 					verbose.getValue(), printError.getValue());
 			if (!chains.hasValue()) {
 				walkmod.check();
@@ -80,7 +86,6 @@ public class WalkmodCheckCommand extends AbstractProjectCommand {
 			return Results
 					.fail("Command 'walkmod-check' fails. You need apply 'walkmod-setup' first.");
 		}
-
 	}
 
 	@Override
