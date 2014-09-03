@@ -16,12 +16,9 @@ package org.walkmod.forge.addon.commands;
 
 import javax.inject.Inject;
 
-import org.jboss.forge.addon.dependencies.Dependency;
-import org.jboss.forge.addon.dependencies.builder.DependencyBuilder;
 import org.jboss.forge.addon.parser.java.facets.JavaSourceFacet;
 import org.jboss.forge.addon.projects.Project;
 import org.jboss.forge.addon.projects.ProjectFactory;
-import org.jboss.forge.addon.projects.facets.DependencyFacet;
 import org.jboss.forge.addon.projects.ui.AbstractProjectCommand;
 import org.jboss.forge.addon.ui.context.UIBuilder;
 import org.jboss.forge.addon.ui.context.UIContext;
@@ -79,18 +76,7 @@ public class WalkmodNewVisitorCommand extends AbstractProjectCommand {
 			method.addParameter("VisitorContext", "context");
 			method.setBody("\n");
 			method.setPublic().setReturnType("void");
-			facet.saveJavaSource(source);
-
-			if (project.hasFacet(DependencyFacet.class)) {
-				DependencyFacet mvnFacet = project
-						.getFacet(DependencyFacet.class);
-				Dependency mp = DependencyBuilder.create()
-						.setGroupId("org.walkmod")
-						.setArtifactId("walkmod-javalang-plugin")
-						.setVersion("LATEST");
-				
-				mvnFacet.addDirectDependency(mp);
-			}
+			facet.saveJavaSource(source);			
 			return Results
 					.success("Command 'walkmod-new-visitor' successfully executed!");
 		} else {

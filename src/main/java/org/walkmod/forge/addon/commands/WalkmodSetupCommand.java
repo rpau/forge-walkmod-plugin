@@ -15,8 +15,11 @@
 package org.walkmod.forge.addon.commands;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+
 import javax.inject.Inject;
-import org.apache.commons.io.FileUtils;
+
 import org.jboss.forge.addon.dependencies.builder.CoordinateBuilder;
 import org.jboss.forge.addon.maven.plugins.ExecutionBuilder;
 import org.jboss.forge.addon.maven.plugins.MavenPluginImpl;
@@ -25,7 +28,6 @@ import org.jboss.forge.addon.projects.Project;
 import org.jboss.forge.addon.projects.ProjectFactory;
 import org.jboss.forge.addon.projects.facets.ResourcesFacet;
 import org.jboss.forge.addon.projects.ui.AbstractProjectCommand;
-import org.jboss.forge.addon.resource.FileResource;
 import org.jboss.forge.addon.ui.context.UIBuilder;
 import org.jboss.forge.addon.ui.context.UIContext;
 import org.jboss.forge.addon.ui.context.UIExecutionContext;
@@ -36,6 +38,7 @@ import org.jboss.forge.addon.ui.metadata.WithAttributes;
 import org.jboss.forge.addon.ui.result.Result;
 import org.jboss.forge.addon.ui.result.Results;
 import org.jboss.forge.addon.ui.util.Metadata;
+import org.jboss.forge.furnace.util.Streams;
 
 public class WalkmodSetupCommand extends AbstractProjectCommand {
 
@@ -61,20 +64,24 @@ public class WalkmodSetupCommand extends AbstractProjectCommand {
 	public Result execute(UIExecutionContext context) throws Exception {
 		Project project = getSelectedProject(context);
 		if (project.hasFacet(ResourcesFacet.class)) {
-			ResourcesFacet resourcesFacet = project
-					.getFacet(ResourcesFacet.class);
 			File fileResource = new File("walkmod.xml");
 			if (!fileResource.exists()) {
-				FileResource<?> template = resourcesFacet
-						.getResource("/template" + File.separator
-								+ "walkmod.xml");
-				if (!template.exists()) {
+
+				InputStream is = this.getClass().getClassLoader()
+						.getResourceAsStream("/template/walkmod.xml");
+				if (is == null) {
 					return Results
 							.fail("The template 'template/walkmod.xml' is not found");
 				}
 				fileResource.createNewFile();
-				FileUtils.writeStringToFile(fileResource,
-						template.getContents());
+				FileOutputStream os = new FileOutputStream(fileResource);
+				try {
+					Streams.write(is, os);
+				} finally {
+					is.close();
+					os.close();
+				}
+
 				if (project.hasFacet(MavenPluginFacet.class)
 						&& embedded.getValue()) {
 					MavenPluginFacet facet = project
