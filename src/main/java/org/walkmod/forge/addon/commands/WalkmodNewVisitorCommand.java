@@ -14,12 +14,17 @@
   along with Walkmod.  If not, see <http://www.gnu.org/licenses/>.*/
 package org.walkmod.forge.addon.commands;
 
+import java.io.File;
+
 import javax.inject.Inject;
 
+import org.jboss.forge.addon.maven.projects.MavenFacet;
 import org.jboss.forge.addon.parser.java.facets.JavaSourceFacet;
 import org.jboss.forge.addon.projects.Project;
 import org.jboss.forge.addon.projects.ProjectFactory;
+import org.jboss.forge.addon.projects.facets.ResourcesFacet;
 import org.jboss.forge.addon.projects.ui.AbstractProjectCommand;
+import org.jboss.forge.addon.resource.FileResource;
 import org.jboss.forge.addon.ui.context.UIBuilder;
 import org.jboss.forge.addon.ui.context.UIContext;
 import org.jboss.forge.addon.ui.context.UIExecutionContext;
@@ -30,6 +35,8 @@ import org.jboss.forge.addon.ui.metadata.WithAttributes;
 import org.jboss.forge.addon.ui.result.Result;
 import org.jboss.forge.addon.ui.result.Results;
 import org.jboss.forge.addon.ui.util.Metadata;
+import org.jboss.forge.parser.xml.Node;
+import org.jboss.forge.parser.xml.XMLParser;
 import org.jboss.forge.roaster.Roaster;
 import org.jboss.forge.roaster.model.source.JavaClassSource;
 import org.jboss.forge.roaster.model.source.MethodSource;
@@ -54,6 +61,7 @@ public class WalkmodNewVisitorCommand extends AbstractProjectCommand {
 		builder.add(visitor);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Result execute(UIExecutionContext context) throws Exception {
 		String fqn = visitor.getValue();
@@ -76,7 +84,33 @@ public class WalkmodNewVisitorCommand extends AbstractProjectCommand {
 			method.addParameter("VisitorContext", "context");
 			method.setBody("\n");
 			method.setPublic().setReturnType("void");
-			facet.saveJavaSource(source);			
+			facet.saveJavaSource(source);
+
+			if (project.hasAllFacets(MavenFacet.class, ResourcesFacet.class)) {
+				MavenFacet maven = project.getFacet(MavenFacet.class);
+
+				String artifactId = maven.getModel().getArtifactId();
+				String groupId = maven.getModel().getGroupId();
+
+				ResourcesFacet resources = project
+						.getFacet(ResourcesFacet.class);
+
+				FileResource<?> pluginDescriptor = resources
+						.getResource("META-INF" + File.separator + "walkmod"
+								+ File.separator + artifactId + ".xml");
+
+				Node xml = XMLParser.parse(pluginDescriptor
+						.getResourceInputStream());
+				Node config = xml.getOrCreate("beans");
+				config.createChild("bean")
+						.attribute(
+								"id",
+								groupId + ":" + artifactId + ":"
+										+ typeName.toLowerCase())
+						.attribute("class", fqn);
+
+				pluginDescriptor.setContents(XMLParser.toXMLString(xml));
+			}
 			return Results
 					.success("Command 'walkmod-new-visitor' successfully executed!");
 		} else {

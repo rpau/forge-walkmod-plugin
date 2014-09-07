@@ -70,16 +70,21 @@ public class WalkmodPluginSetupCommand extends AbstractProjectCommand {
 				FileResource<?> pluginDescriptor = resources
 						.getResource("META-INF" + File.separator + "walkmod"
 								+ File.separator + artifactId + ".xml");
-				pluginDescriptor.createNewFile();
 
-				InputStream is = this.getClass().getClassLoader()
-						.getResourceAsStream("/template/plugin-descriptor.xml");
-				try {
-					pluginDescriptor.setContents(is);
-				} finally {
-					is.close();
+				if (!pluginDescriptor.exists()) {
+					pluginDescriptor.createNewFile();
+
+					InputStream is = this
+							.getClass()
+							.getClassLoader()
+							.getResourceAsStream(
+									"/template/plugin-descriptor.xml");
+					try {
+						pluginDescriptor.setContents(is);
+					} finally {
+						is.close();
+					}
 				}
-
 			} else {
 
 				if (artifactId.startsWith("walkmod-")) {
