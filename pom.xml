@@ -28,17 +28,7 @@
       <artifactId>cdi</artifactId>
       <classifier>forge-addon</classifier>
       <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.forge.furnace.test</groupId>
-      <artifactId>furnace-test-harness</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.forge.furnace.test</groupId>
-      <artifactId>arquillian-furnace-classpath</artifactId>
-      <scope>test</scope>
-    </dependency>
+    </dependency>   
     <dependency>
       <groupId>org.jboss.forge.addon</groupId>
       <artifactId>core</artifactId>
