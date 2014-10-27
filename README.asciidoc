@@ -1,6 +1,6 @@
 == forge-walkmod-plugin
 :idprefix: id_ 
-The forge addon enables to run walkmod [http://www.walkmod.com | Walkmod] commands (install, apply and check) from Forge, create a Walkmod plugin skeleton and initilize a Java project with a simple Walkmod configuration file. 
+The forge addon enables to run http://www.walkmod.com [Walkmod] commands (install, apply and check) from Forge, create a Walkmod plugin skeleton and initilize a Java project with a simple Walkmod configuration file. 
         
 == Setup
 This Addon requires the following installation steps. Run from forge, the following command.
