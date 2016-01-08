@@ -33,17 +33,4 @@ Creates the required project structure / configuration to develop a Walkmod plug
 
 Configures your project to use Walkmod. If the embedded flag is true, it updates your pom.xml with the maven-walkmod-plugin.
 
-=== Add configuration to pom.xml 
-To use this addon, you must add it as a dependency in the *pom.xml* of your `forge-addon` classified artifact:
-
-[source,xml]
-----
-<dependency>
-   <groupId>org.walkmod</groupId>
-   <artifactId>walkmod</artifactId>
-   <classifier>forge-walkmod-plugin</classifier>
-   <version>1.1</version>
-</dependency>
-----
-
 

@@ -90,7 +90,7 @@ public class WalkmodSetupCommand extends AbstractProjectCommand {
 					CoordinateBuilder coordinate = CoordinateBuilder.create()
 							.setGroupId("org.walkmod")
 							.setArtifactId("maven-walkmod-plugin")
-							.setVersion("1.0");
+							.setVersion("1.3");
 					mp.setCoordinate(coordinate);
 					mp.addExecution(ExecutionBuilder.create()
 							.setPhase("generate-sources").addGoal("apply"));
