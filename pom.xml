@@ -33,6 +33,7 @@
       <groupId>org.jboss.forge.addon</groupId>
       <artifactId>core</artifactId>
       <classifier>forge-addon</classifier>
+       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.walkmod</groupId>
