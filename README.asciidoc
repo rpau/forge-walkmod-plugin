@@ -42,7 +42,7 @@ To use this addon, you must add it as a dependency in the *pom.xml* of your `for
    <groupId>org.walkmod</groupId>
    <artifactId>walkmod</artifactId>
    <classifier>forge-walkmod-plugin</classifier>
-   <version>1.0</version>
+   <version>1.1</version>
 </dependency>
 ----
 
